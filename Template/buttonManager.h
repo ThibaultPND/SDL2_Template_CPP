@@ -2,16 +2,18 @@
 #include "imageManager.h"
 #include "fontManager.h"
 #include "application.h"
-#include <functional>
 
+#include <functional>
 class Application;
 
 class Button
 {
 public:
 	Button(const std::string& buttonName, const std::shared_ptr<Image>& image, std::function<void(Application& app)> onClick, bool visible = true)
-		: buttonName(buttonName), image(image), onClick(onClick), visible(visible) {}
-	~Button() {}
+		: buttonName(buttonName), image(image), onClick(onClick), visible(visible), hovering(false) {}
+	~Button() {
+		SDL_DestroyTexture(hoverTexture);
+	}
 
 	const std::string& getName() const { return buttonName; }
 
@@ -26,12 +28,18 @@ public:
 			onClick(app);
 		}
 	}
+	void setHoverTexture(SDL_Texture *hoverTexture) {
+		this->hoverTexture = hoverTexture;
+	}
+
 	void setPosition(int x, int y) {
 		image->setPosition({ x,y });
 	}
 private:
 	std::string buttonName;
 	std::shared_ptr<Image> image;
+	SDL_Texture* hoverTexture;
+	bool hovering;
 	std::function<void(Application& app)> onClick;
 	bool visible;
 };
@@ -66,7 +74,7 @@ public:
 		return 0;
 	}
 	// TODO Ajouter la police du texte.
-	int addCustomButtonWithText(std::string buttonName, std::function<void(Application& app)> onClick,std::string text, SDL_Point buttonPos = {0,0}, SDL_Color buttonColor = {0,0,0,0xFF}, Size size = {50,50}, std::string fontName = "", int fontSize = 24, SDL_Color fontColor = {0,0,0,0xFF}) {
+	int addCustomButtonWithText(std::string buttonName, std::function<void(Application& app)> onClick,std::string text, SDL_Point buttonPos = {0,0}, SDL_Color buttonColor = {0,0,0,0xFF}, Size size = {50,50}, std::string fontName = "", int fontSize = 24, SDL_Color fontColor = {0,0,0,0xFF}, SDL_Color hoverColor = { 0,0,0,0xFF }) {
 		if (buttonExist(buttonName))
 			return 1;
 
